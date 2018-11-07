@@ -1,4 +1,7 @@
 # NodeJS-Backend
+
+[![CircleCI](https://circleci.com/gh/chrismaltais/NodeJS-Backend/tree/master.svg?style=svg)](https://circleci.com/gh/chrismaltais/NodeJS-Backend/tree/master)
+
 The purpose of this repository is to use for reference when explaining the following topics:
 1. MongoDB
 2. API routing
