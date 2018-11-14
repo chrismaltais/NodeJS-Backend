@@ -1,5 +1,5 @@
 // Sets up environments
-require('./config/config');
+//require('./config/config');
 
 const _ = require('lodash');
 const express = require('express');
@@ -7,8 +7,15 @@ const bodyParser = require('body-parser');
 const {ObjectId} = require('mongodb');
 const port = process.env.PORT || 3000;
 
+const IS_TEST = process.env.ENV === "test";
+
 // Use object destructuring otherwise would need to do Member.Member
-let {mongoose} = require('./db/mongoose');
+
+// If in testing environment, database is will be connected in memory 
+if (!IS_TEST) {
+    let {mongoose} = require('./db/mongoose');
+}
+ 
 let {Member} = require('./models/members');
 let {Project} = require('./models/projects');
 
