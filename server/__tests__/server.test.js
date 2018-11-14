@@ -1,10 +1,12 @@
 const request = require('supertest');
 const {ObjectId} = require('mongodb');
 
-const {app} = require('./../server');
+const {appTest} = require('./config/mock-api');
 const {Member} = require('./../models/members');
 
-let testMembers = [{
+console.log(global.__MONGO_URI__);
+
+/*let testMembers = [{
     _id: new ObjectId(),
     name: 'Jeff Jeffy',
     email: 'jeff.jeffy@queensu.ca',
@@ -34,7 +36,7 @@ describe('POST /members', () => {
             password: 'pass123'
         };
         //Supertest!!
-        request(app)
+        appTest
             .post('/members')
             .send(testMember)
             .expect(200)
@@ -58,7 +60,7 @@ describe('POST /members', () => {
     });
 
     it('should not create member with invalid body data', (done) => {
-        request(app)
+        appTest
             .post('/members')
             .send()
             .expect(400)
@@ -74,21 +76,19 @@ describe('POST /members', () => {
                 });
             });
     });
-});
+}); */
 
 describe('GET /members', () => {
-    it('should get all members', (done) => {
-        request(app)
-            .get('/api/members')
+    it('should get all members', async () => {
+        const response = await appTest.get('/api/members')
             .expect(200)
             .expect((res) => { // Custom expect call
                 expect(res.body.members.length).toBe(2);
-            })
-            .end(done)
+            });
     });
 });
 
-describe('GET /members/:id', () => {
+/*describe('GET /members/:id', () => {
     it('should return member document', (done) => {
         request(app)
             .get(`/members/${testMembers[0]._id.toHexString()}`)
@@ -194,4 +194,4 @@ describe('PATCH /members/:id', () => {
             .expect(404)
             .end(done)
     });
-});
+}); */
