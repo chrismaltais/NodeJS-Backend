@@ -1,4 +1,5 @@
 const Router = require('express').Router
+const {ObjectId} = require('mongodb');
 
 module.exports = (controller) => {
     const memberAPI = Router();
@@ -14,5 +15,21 @@ module.exports = (controller) => {
         });
     });
 
+    memberAPI.get('/members/:id', (req, res) => {
+        let id = req.params.id;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(404).send({
+                error: 'ObjectId is not valid'
+            });
+        }
+
+        member
+            .getMember(id).then((uniqueMember) => {
+                res.status(200).send(uniqueMember);
+            }, (err) => {
+                res.status(400).send(err);
+            })
+    });
     return memberAPI;
 }

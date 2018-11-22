@@ -1,4 +1,5 @@
 const request = require('supertest');
+const _ = require('lodash');
 const {ObjectId} = require('mongodb');
 
 const {appTest} = require('./config/mock-api');
@@ -78,9 +79,10 @@ describe('POST /members', () => {
     });
 }); */
 
-describe('GET /members', () => {
+describe('GET /api/members', () => {
     it('should get all members', async () => {
-        const response = await appTest.get('/api/members')
+        const response = await appTest
+            .get('/api/members')
             .expect(200)
             .expect((res) => { // Custom expect call
                 expect(res.body.members.length).toBe(2);
@@ -88,37 +90,38 @@ describe('GET /members', () => {
     });
 });
 
-/*describe('GET /members/:id', () => {
-    it('should return member document', (done) => {
-        request(app)
-            .get(`/members/${testMembers[0]._id.toHexString()}`)
+describe('GET /api/members/:id', () => {
+    it('should return member document', async () => {
+        const memberFromDB = await Member.findOne({});
+        const response = await appTest
+            .get(`/api/members/${memberFromDB._id.toHexString()}`)
             .expect(200)
             .expect((res) => {
-                expect(res.body.member.name).toBe(testMembers[0].name);
-                expect(res.body.member.email).toBe(testMembers[0].email);
-                expect(res.body.member.password).toBe(testMembers[0].password)
-            })
-            .end(done)
+                expect(res.body.member.name).toBe(memberFromDB.name);
+                expect(res.body.member.email).toBe(memberFromDB.email);
+                expect(res.body.member.password).toBe(memberFromDB.password);
+            });
     });
 
     it('should return 404 if member not found', (done) => {
         // Make sure you get 404 back
         let fakeID = new ObjectId();
-        request(app)
-            .get(`/members/${fakeID.toHexString}`)
+        appTest
+            .get(`/api/members/${fakeID.toHexString}`)
             .expect(404)
             .end(done);
     });
 
     it('should return 404 for non-object ids', (done) => {
         // /todos/123
-        request(app)
-            .get('/members/123')
+        appTest
+            .get('/api/members/123')
             .expect(404)
             .end(done)
     })
 });
 
+/*
 describe('DELETE /members/:id', () => {
     it('should delete member document', (done) => {
         let id = testMembers[0]._id.toHexString()

@@ -1,5 +1,5 @@
 // Sets up environments
-//require('./config/config');
+require('./config/config');
 
 const _ = require('lodash');
 const express = require('express');
@@ -58,24 +58,24 @@ app.post('/members', (req, res) => {
 //     });
 // });
 
-app.get('/members/:id', (req, res) => {
-    let id = req.params.id;
+// app.get('/members/:id', (req, res) => {
+//     let id = req.params.id;
 
-    if (!ObjectId.isValid(id)) {
-        res.status(404).send({
-            error: 'ObjectId is not valid'
-        });
-    }
+//     if (!ObjectId.isValid(id)) {
+//         res.status(404).send({
+//             error: 'ObjectId is not valid'
+//         });
+//     }
 
-    Member.findById(id).then((member) => {
-        if (!member) {
-            return res.status(404).send({error: 'Member not found'});
-        }
-        res.status(200).send({member}); // Object name returned is 'member'
-    }).catch((err) => {
-        res.status(400).send(); // Send needs to be blank, why?
-    });
-});
+//     Member.findById(id).then((member) => {
+//         if (!member) {
+//             return res.status(404).send({error: 'Member not found'});
+//         }
+//         res.status(200).send({member}); // Object name returned is 'member'
+//     }).catch((err) => {
+//         res.status(400).send(); // Send needs to be blank, why?
+//     });
+// });
 
 app.delete('/members/:id', (req, res) => {
     let id = req.params.id;

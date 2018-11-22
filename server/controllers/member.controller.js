@@ -15,5 +15,21 @@ module.exports = {
                 })
 
         });
+    },
+
+    getMember(id) {
+        return new Promise((resolve, reject) => {
+            Member.findById(id).then((member) => {
+                resolve({
+                    member,
+                    message: "This message is coming from member.controller.js"
+                })
+            })
+            .catch((err) => {
+                reject(`Could not retrieve member ${id}`);
+            })
+        })
+
     }
+
 }
