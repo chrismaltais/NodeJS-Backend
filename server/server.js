@@ -30,52 +30,10 @@ app.use(bodyParser.json());
 
 // All API routes & logic are done through this line
 // Done so far:
-// GET /members
+// GET /api/members
+// GET /api/members/:id
+// POST /api/members
 app.use('/api/', api(controllers));
-
-app.post('/members', (req, res) => {
-    let member = new Member({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password
-    });
-
-    member.save().then((doc) => {
-        res.send(doc);
-    }, (err) => {
-        res.status(400).send(err);
-    })
-});
-
-// app.get('/members', (req, res) => {
-//     Member.find().then((members) => {
-//         res.send({
-//             members, // This is what your object will be called!
-//             message: 'This is a test!'
-//         })
-//     }, (err) => {
-//         res.status(400).send(err);
-//     });
-// });
-
-// app.get('/members/:id', (req, res) => {
-//     let id = req.params.id;
-
-//     if (!ObjectId.isValid(id)) {
-//         res.status(404).send({
-//             error: 'ObjectId is not valid'
-//         });
-//     }
-
-//     Member.findById(id).then((member) => {
-//         if (!member) {
-//             return res.status(404).send({error: 'Member not found'});
-//         }
-//         res.status(200).send({member}); // Object name returned is 'member'
-//     }).catch((err) => {
-//         res.status(400).send(); // Send needs to be blank, why?
-//     });
-// });
 
 app.delete('/members/:id', (req, res) => {
     let id = req.params.id;

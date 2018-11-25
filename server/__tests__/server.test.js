@@ -21,15 +21,10 @@ console.log(global.__MONGO_URI__);
     bio: null
 }];
 
-// Clear DB to allow for proper testing
-beforeEach((done) => {
-    Member.deleteMany({}).then(() => {
-        return Member.insertMany(testMembers)
-    }).then(() => done())
-});
+*/
 
 describe('POST /members', () => {
-    it('should create a new member', (done) => {
+    it('should create a new member', async() => {
         // Mock Data
         let testMember = {
             name: 'Chris Maltais',
@@ -37,32 +32,28 @@ describe('POST /members', () => {
             password: 'pass123'
         };
         //Supertest!!
-        appTest
-            .post('/members')
+        const response = await appTest
+            .post('/api/members')
             .send(testMember)
             .expect(200)
             .expect((res) => {
-                expect(res.body.name).toBe(testMember.name);
-                expect(res.body.email).toBe(testMember.email);
-                expect(res.body.password).toBe(testMember.password);
+                console.log(res)
+                expect(res.body.savedMember.name).toBe(testMember.name);
+                expect(res.body.savedMember.email).toBe(testMember.email);
+                expect(res.body.savedMember.password).toBe(testMember.password);
             })
-            .end((err, res) => { // handles errors above
-                if (err) {
-                    return done(err);
-                }
-                Member.find({email: testMember.email}).then((members) => {
-                    expect(members.length).toBe(1); 
-                    expect(members[0].name).toBe(testMember.name);
-                    expect(members[0].email).toBe(testMember.email);
-                    expect(members[0].password).toBe(testMember.password);
-                    done();
-                }).catch((err) => done(err));
-            });
+          
+        const dbSearch = await Member.find({email: testMember.email}).then((members) => {
+            expect(members.length).toBe(1); 
+            expect(members[0].name).toBe(testMember.name);
+            expect(members[0].email).toBe(testMember.email);
+            expect(members[0].password).toBe(testMember.password);
+        });
     });
 
     it('should not create member with invalid body data', (done) => {
         appTest
-            .post('/members')
+            .post('/api/members')
             .send()
             .expect(400)
             .end((err, res) => {
@@ -77,8 +68,9 @@ describe('POST /members', () => {
                 });
             });
     });
-}); */
+}); 
 
+// GET /api/members
 describe('GET /api/members', () => {
     it('should get all members', async () => {
         const response = await appTest

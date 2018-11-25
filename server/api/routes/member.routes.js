@@ -31,5 +31,15 @@ module.exports = (controller) => {
                 res.status(400).send(err);
             })
     });
+
+    memberAPI.post("/members", (req, res) => {
+        member
+            .createMember(req.body).then((createdMember) => {
+                res.status(200).json(createdMember);
+            }, (err) => {
+                res.status(400).send(err);
+            });
+    });
+
     return memberAPI;
 }

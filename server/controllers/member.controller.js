@@ -28,8 +28,26 @@ module.exports = {
             .catch((err) => {
                 reject(`Could not retrieve member ${id}`);
             })
-        })
+        });
+    },
 
+    createMember(memberToCreate) {
+        newCreatedMember = new Member ({
+            name: memberToCreate.name,
+            email: memberToCreate.email,
+            password: memberToCreate.password
+        });
+
+        return new Promise((resolve, reject) => {
+            newCreatedMember.save().then((savedMember) => {
+                resolve({
+                    savedMember,
+                    message: "This message is coming from member.controller.js"
+                })
+            }).catch((err) => {
+                reject("Could not create new member");
+            })
+        });
     }
 
 }
