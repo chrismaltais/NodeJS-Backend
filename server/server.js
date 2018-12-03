@@ -35,7 +35,7 @@ app.use(bodyParser.json());
 // POST /api/members
 app.use('/api/', api(controllers));
 
-app.delete('/members/:id', (req, res) => {
+/*app.delete('/members/:id', (req, res) => {
     let id = req.params.id;
      
     if (!ObjectId.isValid(id)) {
@@ -50,7 +50,7 @@ app.delete('/members/:id', (req, res) => {
         }
         res.status(200).send({member, deleted: true});
     }).catch((err) => res.status(400).send());
-});
+}); */
 
 app.patch('/members/:id', (req, res) => {
     let id = req.params.id;

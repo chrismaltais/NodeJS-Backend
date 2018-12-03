@@ -5,13 +5,10 @@ module.exports = {
         return new Promise((resolve, reject) => {
             Member.find()
                 .then((members) => {
-                    resolve({
-                        members,
-                        message: "This is coming from member.controller.js"
-                    });
+                    resolve(members);
                 })
                 .catch((err) => {
-                    reject('Could not retrieve all members!');
+                    reject({message: "Not found"});
                 })
 
         });
@@ -20,13 +17,13 @@ module.exports = {
     getMember(id) {
         return new Promise((resolve, reject) => {
             Member.findById(id).then((member) => {
-                resolve({
-                    member,
-                    message: "This message is coming from member.controller.js"
-                })
+                if (!member) {
+                    reject({message: `Could not retrieve member ${id}`});
+                }
+                resolve(member);
             })
             .catch((err) => {
-                reject(`Could not retrieve member ${id}`);
+                reject({message: 'Not found'});
             })
         });
     },
@@ -39,13 +36,24 @@ module.exports = {
         });
 
         return new Promise((resolve, reject) => {
-            newCreatedMember.save().then((savedMember) => {
-                resolve({
-                    savedMember,
-                    message: "This message is coming from member.controller.js"
-                })
+            newCreatedMember.save().then((member) => {
+                resolve(member);
             }).catch((err) => {
-                reject("Could not create new member");
+                reject({message: 'Creation of member failed'});
+            })
+        });
+    },
+
+    deleteMember(id) {
+        return new Promise((resolve, reject) => {
+            // If not in database
+            Member.findByIdAndDelete(id).then((member) => {
+                if (!member) {
+                    reject(`Could not find member ${id}`);
+                }
+                resolve(member);
+            }).catch((err) => {
+                reject(`Could not delete member ${id}`);
             })
         });
     }

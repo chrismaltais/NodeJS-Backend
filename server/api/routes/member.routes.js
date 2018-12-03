@@ -19,27 +19,42 @@ module.exports = (controller) => {
         let id = req.params.id;
 
         if (!ObjectId.isValid(id)) {
-            return res.status(404).send({
+            return res.status(400).send({
                 error: 'ObjectId is not valid'
             });
         }
 
         member
-            .getMember(id).then((uniqueMember) => {
-                res.status(200).send(uniqueMember);
+            .getMember(id).then((member) => {
+                res.status(200).send(member);
             }, (err) => {
-                res.status(400).send(err);
+                res.status(404).send(err);
             })
     });
 
     memberAPI.post("/members", (req, res) => {
         member
-            .createMember(req.body).then((createdMember) => {
-                res.status(200).json(createdMember);
+            .createMember(req.body).then((member) => {
+                res.status(201).send(member);
             }, (err) => {
                 res.status(400).send(err);
             });
     });
+
+    memberAPI.delete("/members/:id", (req, res) => {
+        let id = req.params.id; // Grab ID
+        if (!ObjectId.isValid(id)) { // Check if valid id, throw 404 if not
+            return res.status(400).send({
+                error: "ObjectId is not valid"
+            });
+        }
+
+        member.deleteMember(id).then((deletedMember) => { // delete the member and return deleted: true
+            res.status(200).send(deletedMember);
+        }, (err) => {
+            res.status(404).send(err)
+        });
+    })
 
     return memberAPI;
 }
