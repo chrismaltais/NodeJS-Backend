@@ -35,15 +35,13 @@ describe('POST /members', () => {
         const response = await appTest
             .post('/api/members')
             .send(testMember)
-            .expect(200)
-            .expect((res) => {
-                console.log(res)
-                expect(res.body.savedMember.name).toBe(testMember.name);
-                expect(res.body.savedMember.email).toBe(testMember.email);
-                expect(res.body.savedMember.password).toBe(testMember.password);
-            })
+            .expect(201)
+        
+        let memberFromAPI = response.body;
+        expect(memberFromAPI.name).toBe(testMember.name);
+        expect(memberFromAPI.email).toBe(testMember.email);
           
-        const dbSearch = await Member.find({email: testMember.email}).then((members) => {
+        const dbSearch = await Member.find({_id: memberFromAPI._id}).then((members) => {
             expect(members.length).toBe(1); 
             expect(members[0].name).toBe(testMember.name);
             expect(members[0].email).toBe(testMember.email);
@@ -51,22 +49,15 @@ describe('POST /members', () => {
         });
     });
 
-    it('should not create member with invalid body data', (done) => {
-        appTest
+    it('should not create member with invalid body data', async() => {
+        let response = await appTest
             .post('/api/members')
             .send()
             .expect(400)
-            .end((err, res) => {
-                if (err) {
-                    return done(err);
-                }
-                Member.find().then((members) => {
-                    expect(members.length).toBe(2);
-                    done(err);
-                }).catch((err) => {
-                    done(err);
-                });
-            });
+        
+        const dbValidate = await Member.find().then((members) => {
+            expect(members.length).toBe(2);
+        });
     });
 }); 
 
@@ -76,81 +67,96 @@ describe('GET /api/members', () => {
         const response = await appTest
             .get('/api/members')
             .expect(200)
-            .expect((res) => { // Custom expect call
-                expect(res.body.members.length).toBe(2);
-            });
+
+        membersFromDB = await Member.find({}); // Should be 2 members
+        membersFromAPI = response.body;
+        
+        membersFromDB.forEach((member, i) => {
+            let memberFromDBID = member._id.toHexString();
+            expect(memberFromDBID).toEqual(membersFromAPI[i]._id);
+            expect(member.email).toEqual(membersFromAPI[i].email);
+        })
     });
 });
 
 describe('GET /api/members/:id', () => {
+    it('should have the same ObjectID', async() => {
+        const memberFromDB = await Member.findOne({});
+        expect(typeof memberFromDB._id).toBe('object');
+        const memberFromDBID = memberFromDB._id.toHexString();
+
+        const response = await appTest
+            .get(`/api/members/${memberFromDBID}`)
+            .expect(200)
+        
+        let memberFromAPI = response.body;
+
+        expect(memberFromDBID).toBe(memberFromAPI._id);
+    });
+
     it('should return member document', async () => {
         const memberFromDB = await Member.findOne({});
+        const memberFromDBID = memberFromDB._id.toHexString();
         const response = await appTest
-            .get(`/api/members/${memberFromDB._id.toHexString()}`)
+            .get(`/api/members/${memberFromDBID}`)
             .expect(200)
-            .expect((res) => {
-                expect(res.body.member.name).toBe(memberFromDB.name);
-                expect(res.body.member.email).toBe(memberFromDB.email);
-                expect(res.body.member.password).toBe(memberFromDB.password);
-            });
+        
+        let memberFromAPI = response.body;
+        expect(memberFromDB.name).toBe(memberFromAPI.name);
+        expect(memberFromDB.email).toBe(memberFromAPI.email);
     });
 
-    it('should return 404 if member not found', (done) => {
+    it('should return 404 if member not found', async() => {
         // Make sure you get 404 back
         let fakeID = new ObjectId();
-        appTest
-            .get(`/api/members/${fakeID.toHexString}`)
+        let response = await appTest
+            .get(`/api/members/${fakeID.toHexString()}`)
             .expect(404)
-            .end(done);
     });
 
-    it('should return 404 for non-object ids', (done) => {
+    it('should return 400 for non-object ids', (done) => {
         // /todos/123
         appTest
             .get('/api/members/123')
-            .expect(404)
+            .expect(400)
             .end(done)
     })
 });
 
-/*
 describe('DELETE /members/:id', () => {
-    it('should delete member document', (done) => {
-        let id = testMembers[0]._id.toHexString()
-        request(app)
-            .delete(`/members/${id}`)
+    it('should delete member document', async() => {
+        const memberFromDB = await Member.findOne({});
+        const id = memberFromDB._id;
+        let response = await appTest
+            .delete(`/api/members/${id.toHexString()}`)
             .expect(200)
-            .expect((result) => {
-                expect(result.body.member.name).toBe(testMembers[0].name);
-                expect(result.body.member.email).toBe(testMembers[0].email);
-                expect(result.body.member.password).toBe(testMembers[0].password);
-            }).end((err, res) => {
-                if (err) {
-                    return done(err);
-                }
-                Member.findById(id).then((member) => {
-                    expect(member).toBeNull();
-                    done();
-                }).catch((e) => done(e));
-            })
+        
+        let deletedMember = response.body;
+        expect(deletedMember.name).toBe(memberFromDB.name);
+        expect(deletedMember.email).toBe(memberFromDB.email);
+        expect(deletedMember._id).toBe(id.toHexString());
+        
+        let checkDBForMember = await Member
+            .findById(id).then((member) => {
+                expect(member).toBeNull();
+            });
     });
 
-    it('should return 404 if member not found', (done) => {
+    it('should return 404 if member not found', async() => {
         let fakeID = new ObjectId();
-        request(app)
-            .delete(`/members/${fakeID.toHexString()}`)
+        let response = await appTest
+            .delete(`/api/members/${fakeID.toHexString()}`)
             .expect(404)
-            .end(done)
     });
 
-    it('should return 404 for non-object ids', (done) => {
-        request(app)
-            .delete('/members/123')
-            .expect(404)
-            .end(done)
+    it('should return 400 for non-object ids', async() => {
+        let response = await appTest
+            .delete('/api/members/123')
+            .expect(400)
     });
 });
 
+/*
 describe('PATCH /members/:id', () => {
     it('should update a member', (done) => {
         let updatedInfo = {
