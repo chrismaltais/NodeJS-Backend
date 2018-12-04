@@ -7,6 +7,7 @@ The purpose of this repository is to use for reference when explaining the follo
 2. API routing
 3. Unit testing
 4. Seperation of concerns
-5. Environment seperation (Dev, Testing, Prod)
-6. Continuous Integration
-7. Continuous Deployment (eventually...)
+5. Token-based security & password hashing
+6. Environment seperation (Dev, Testing, Prod)
+7. Continuous Integration
+8. Continuous Deployment (eventually...)
